@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="airwallex_inline_form">
+        <div t-att-data-provider-id="provider_id" t-att-data-provider-code="'airwallex'" class="o_airwallex_inline_form">
+            <div id="dropIn" style="margin: 10px 0;"></div>
+            <div id="airwallex-error-message" class="text-danger small mt-2" role="alert"></div>
+        </div>
+    </template>
+
+    <template id="airwallex_dynamic_logos" inherit_id="payment.method_form">
+        <xpath expr="//div[contains(@class, 'gap-1') and contains(@class, 'flex-wrap') and contains(@class, 'd-flex')]" position="inside">
+            <t t-set="current_currency" t-value="currency.name or website_sale_order.currency_id.name or website.currency_id.name"/>
+            <t t-set="current_code" t-value="(pm_sudo and pm_sudo.code) or (logo_pm_sudo and logo_pm_sudo.code)"/>
+            
+            <t t-if="current_code == 'airwallex'">
+                <!-- 情境 A：HKD 顯示payme -->
+                <t t-if="current_currency == 'HKD'">
+                    <img t-att-src="'/payment_airwallex/static/description/payme.png'" 
+                         class="img-fluid o_payment_option_img" alt="Payme"
+                         style="width: 45px; height: 30px; object-fit: contain; vertical-align: middle; border-radius: 4px;"/>
+                </t>
+                <!-- 情境 B：非 HKD 且非 CNY 顯示 VISA & MASTER -->
+                <t t-elif="current_currency not in ['HKD', 'CNY']">
+                    <img t-att-src="'/payment_airwallex/static/description/visa.png'" 
+                         class="img-fluid o_payment_option_img" alt="VISA"
+                         style="width: 45px; height: 30px; object-fit: contain; vertical-align: middle; border-radius: 4px;"/>
+                    <img t-att-src="'/payment_airwallex/static/description/mastercard.png'" 
+                         class="img-fluid o_payment_option_img" alt="MasterCard"
+                         style="width: 45px; height: 30px; object-fit: contain; vertical-align: middle; border-radius: 4px;"/>
+                </t>
+            </t>
+        </xpath>
+    </template>    
+</odoo>

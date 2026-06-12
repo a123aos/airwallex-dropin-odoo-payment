@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="payment_provider_form_airwallex" model="ir.ui.view">
+        <field name="name">payment.provider.form.airwallex</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form"/>
+        <field name="arch" type="xml">
+            
+            <xpath expr="//div[@name='button_box']" position="attributes">
+                <attribute name="invisible">0</attribute>
+            </xpath>
+
+            <xpath expr="//group[@name='provider_credentials']" position="inside">
+                <group invisible="code != 'airwallex'">
+                    <field name="airwallex_client_id" 
+                           string="Client ID"
+                           required="code == 'airwallex' and state != 'disabled'"/>
+                    <field name="airwallex_api_key" 
+                           string="API Key"
+                           password="True" 
+                           required="code == 'airwallex' and state != 'disabled'"/>
+                    <field name="airwallex_webhook_secret" 
+                           string="Webhook Secret"
+                           password="True"/>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

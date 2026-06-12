@@ -1,0 +1,198 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* payment_airwallex
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 19.0-20260513\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-05-23 07:39+0000\n"
+"PO-Revision-Date: 2026-05-23 07:39+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: payment_airwallex
+#: model_terms:ir.ui.view,arch_db:payment_airwallex.payment_provider_form_airwallex
+msgid "API Key"
+msgstr ""
+
+#. module: payment_airwallex
+#: model:account.payment.method,name:payment_airwallex.account_payment_method_airwallex
+#: model:ir.model.fields.selection,name:payment_airwallex.selection__payment_provider__code__airwallex
+#: model:payment.provider,name:payment_airwallex.payment_provider_airwallex
+msgid "Airwallex"
+msgstr ""
+
+#. module: payment_airwallex
+#: model:ir.model.fields,field_description:payment_airwallex.field_payment_provider__airwallex_api_key
+msgid "Airwallex API Key"
+msgstr ""
+
+#. module: payment_airwallex
+#: model:ir.model.fields,field_description:payment_airwallex.field_payment_provider__airwallex_access_token
+msgid "Airwallex Access Token"
+msgstr ""
+
+#. module: payment_airwallex
+#: model:ir.model.fields,field_description:payment_airwallex.field_payment_provider__airwallex_client_id
+msgid "Airwallex Client ID"
+msgstr ""
+
+#. module: payment_airwallex
+#: model:ir.model.fields,field_description:payment_airwallex.field_payment_transaction__airwallex_client_secret
+msgid "Airwallex Client Secret"
+msgstr ""
+
+#. module: payment_airwallex
+#. odoo-javascript
+#: code:addons/payment_airwallex/static/src/interactions/payment_form.js:0
+msgid "Airwallex SDK loading timeout."
+msgstr ""
+
+#. module: payment_airwallex
+#: model:ir.model.fields,field_description:payment_airwallex.field_payment_provider__airwallex_token_expiry
+msgid "Airwallex Token Expiry"
+msgstr ""
+
+#. module: payment_airwallex
+#: model:ir.model.fields,field_description:payment_airwallex.field_payment_provider__airwallex_webhook_secret
+msgid "Airwallex Webhook Secret"
+msgstr ""
+
+#. module: payment_airwallex
+#. odoo-python
+#: code:addons/payment_airwallex/models/payment_provider.py:0
+msgid "Airwallex Webhook 建立成功！"
+msgstr ""
+
+#. module: payment_airwallex
+#. odoo-python
+#: code:addons/payment_airwallex/models/payment_transaction.py:0
+msgid "Airwallex 交易失敗或已過期。"
+msgstr ""
+
+#. module: payment_airwallex
+#. odoo-python
+#: code:addons/payment_airwallex/models/payment_provider.py:0
+msgid "Airwallex 請求失敗: %s"
+msgstr ""
+
+#. module: payment_airwallex
+#. odoo-python
+#: code:addons/payment_airwallex/models/payment_provider.py:0
+msgid "Airwallex 身份驗證失敗。"
+msgstr ""
+
+#. module: payment_airwallex
+#. odoo-python
+#: code:addons/payment_airwallex/models/payment_transaction.py:0
+msgid "Airwallex 退款失敗。"
+msgstr ""
+
+#. module: payment_airwallex
+#. odoo-javascript
+#: code:addons/payment_airwallex/static/src/interactions/payment_form.js:0
+msgid "Card Error"
+msgstr ""
+
+#. module: payment_airwallex
+#: model_terms:ir.ui.view,arch_db:payment_airwallex.payment_provider_form_airwallex
+msgid "Client ID"
+msgstr ""
+
+#. module: payment_airwallex
+#: model:ir.model.fields,field_description:payment_airwallex.field_payment_provider__code
+msgid "Code"
+msgstr "代碼"
+
+#. module: payment_airwallex
+#: model:ir.model.fields,field_description:payment_airwallex.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_airwallex.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr "顯示名稱"
+
+#. module: payment_airwallex
+#. odoo-javascript
+#: code:addons/payment_airwallex/static/src/interactions/payment_form.js:0
+msgid "Error"
+msgstr ""
+
+#. module: payment_airwallex
+#. odoo-javascript
+#: code:addons/payment_airwallex/static/src/interactions/payment_form.js:0
+msgid "Failed to create Airwallex Card Element."
+msgstr ""
+
+#. module: payment_airwallex
+#: model:ir.model.fields,field_description:payment_airwallex.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_airwallex.field_payment_transaction__id
+msgid "ID"
+msgstr "識別號"
+
+#. module: payment_airwallex
+#. odoo-javascript
+#: code:addons/payment_airwallex/static/src/interactions/payment_form.js:0
+msgid "Payment Failed"
+msgstr ""
+
+#. module: payment_airwallex
+#: model:ir.model,name:payment_airwallex.model_payment_provider
+msgid "Payment Provider"
+msgstr "付款服務商"
+
+#. module: payment_airwallex
+#: model:ir.model,name:payment_airwallex.model_payment_transaction
+msgid "Payment Transaction"
+msgstr "付款交易"
+
+#. module: payment_airwallex
+#. odoo-javascript
+#: code:addons/payment_airwallex/static/src/interactions/payment_form.js:0
+msgid "Payment element not initialized correctly."
+msgstr ""
+
+#. module: payment_airwallex
+#. odoo-javascript
+#: code:addons/payment_airwallex/static/src/interactions/payment_form.js:0
+msgid "Technical Error"
+msgstr ""
+
+#. module: payment_airwallex
+#: model:ir.model.fields,help:payment_airwallex.field_payment_provider__code
+msgid "The technical code of this payment provider."
+msgstr "此付款服務商的技術代碼。"
+
+#. module: payment_airwallex
+#: model_terms:ir.ui.view,arch_db:payment_airwallex.payment_provider_form_airwallex
+msgid "Webhook Secret"
+msgstr ""
+
+#. module: payment_airwallex
+#: model_terms:payment.provider,auth_msg:payment_airwallex.payment_provider_airwallex
+msgid "Your payment has been authorized."
+msgstr "您的付款已獲得授權。"
+
+#. module: payment_airwallex
+#: model_terms:payment.provider,cancel_msg:payment_airwallex.payment_provider_airwallex
+msgid "Your payment has been cancelled."
+msgstr "您的付款已取消。"
+
+#. module: payment_airwallex
+#: model_terms:payment.provider,pending_msg:payment_airwallex.payment_provider_airwallex
+msgid "Your payment has been processed but is waiting for approval."
+msgstr "您的付款已處理，但正等待審核。"
+
+#. module: payment_airwallex
+#: model_terms:payment.provider,done_msg:payment_airwallex.payment_provider_airwallex
+msgid "Your payment has been processed."
+msgstr "您的付款已處理完成。"
+
+#. module: payment_airwallex
+#. odoo-python
+#: code:addons/payment_airwallex/models/payment_provider.py:0
+msgid "無法連接至 Airwallex 伺服器。"
+msgstr ""

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="0">
+    <record id="payment_method_airwallex" model="payment.method">
+        <field name="name">Airwallex</field>
+        <field name="code">airwallex</field>
+        <field name="active">True</field>
+        <field name="support_tokenization">True</field>
+        <field name="image" type="base64" file="payment_airwallex/static/description/icon.png"/>
+    </record>
+
+    <record id="payment_method_wechat_pay" model="payment.method">
+        <field name="name">WechatPay</field>
+        <field name="code">WechatPay</field>
+        <field name="primary_payment_method_id" eval="ref('payment_method_airwallex')"/>
+        <field name="sequence">4</field>
+        <field name="active">True</field>
+        <field name="image" type="base64" file="payment_airwallex/static/description/wechat_pay.png"/>
+    </record>
+  
+    <record id="payment_provider_airwallex" model="payment.provider">
+        <field name="name">Airwallex</field>
+        <field name="code">airwallex</field>
+        <field name="state">enabled</field>
+        <field name="is_published">True</field>
+        <field name="inline_form_view_id" ref="payment_airwallex.airwallex_inline_form"/>
+        
+        <field name="payment_method_ids" eval="[
+            Command.set([
+                ref('payment_airwallex.payment_method_airwallex'),
+            ])
+        ]"/>
+    </record>
+
+    <record id="account_payment_method_airwallex" model="account.payment.method">
+        <field name="name">Airwallex</field>
+        <field name="code">airwallex</field>
+        <field name="payment_type">inbound</field>
+    </record>
+</odoo>
