@@ -65,20 +65,32 @@ patch(PaymentForm.prototype, {
 
             // 4. 建立 Drop-in 設定
             const currency = processingValues['currency'];
-            console.log("Airwallex: 準備建立元件, 幣種:", currency, "IntentID:", processingValues['intent_id']);
+            const countryCode = processingValues['country_code'] || 'HK';
+            const methodMapping = {
+                'HKD': ['wechatpay', 'payme'],
+                'CNY': ['wechatpay'],
+                'SGD': ['pay_now', 'wechatpay'],
+                'KRW': ['kakaopay', 'wechatpay'],
+
+            };
+
             const options = {
                 intent_id: processingValues['intent_id'],
                 client_secret: processingValues['client_secret'],
                 currency: currency,
-                country_code: 'HK',
+                country_code: countryCode,
+                applePayRequestOptions: {
+                    countryCode: countryCode,
+                    buttonType: 'buy',
+                    buttonColor: 'black',
+                },
             };
-
-            if (currency === 'HKD') {
-                options.methods = ['wechatpay', 'payme'];
-            } else if (currency === 'CNY') {
-                options.methods = ['wechatpay'];
+            if (methodMapping[currency]) {
+                options.methods = methodMapping[currency];
+            } else {
+            console.warn(`Airwallex: 幣別 ${currency} 未定義特定支付方式，使用預設值。`);
             }
-
+            
             // 5. 建立並掛載 Drop-in
             console.log("Airwallex: 呼叫 createElement...");
             this.airwallexDropIn = await window.AirwallexComponentsSDK.createElement('dropIn', options);

@@ -7,15 +7,6 @@
         <field name="support_tokenization">True</field>
         <field name="image" type="base64" file="payment_airwallex/static/description/icon.png"/>
     </record>
-
-    <record id="payment_method_wechat_pay" model="payment.method">
-        <field name="name">WechatPay</field>
-        <field name="code">WechatPay</field>
-        <field name="primary_payment_method_id" eval="ref('payment_method_airwallex')"/>
-        <field name="sequence">4</field>
-        <field name="active">True</field>
-        <field name="image" type="base64" file="payment_airwallex/static/description/wechat_pay.png"/>
-    </record>
   
     <record id="payment_provider_airwallex" model="payment.provider">
         <field name="name">Airwallex</field>

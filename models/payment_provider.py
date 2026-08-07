@@ -28,40 +28,59 @@ class PaymentProvider(models.Model):
     airwallex_access_token = fields.Char(groups='base.group_system', copy=False)
     airwallex_token_expiry = fields.Datetime(groups='base.group_system', copy=False)
 
-    # === 核心業務邏輯：建立或取得支付意向 ===
     def _airwallex_create_intent(self, transaction):
         """
-        統一入口：處理支付意向建立，並加入冪等性檢查 (Idempotency)。
+        統一入口：處理支付意向建立，包含過期檢查與國家代碼動態注入。
         """
         self.ensure_one()
 
-        # 1. 冪等性檢查：如果已經有 Intent ID，則查詢狀態而非建立
+        # 1. 準備國家代碼
+        country_code = 'HK' 
+        if transaction.sale_order_ids:
+            order = transaction.sale_order_ids[0]
+            partner = order.partner_shipping_id or order.partner_id
+            if partner and partner.country_id:
+                country_code = partner.country_id.code or 'HK'
+
+        # 2. 冪等性與過期檢查：如果已有 reference，查詢狀態
         if transaction.provider_reference:
             _logger.info("Airwallex: 交易 %s 已存在 Intent，查詢狀態中...", transaction.reference)
-            res = self._airwallex_make_request(f'pa/payment_intents/{transaction.provider_reference}', method='GET')
-            # 【關鍵修復】確保查詢現有 Intent 時，回傳給 transaction.py 的字典結構與新建時完全對齊
-            return {
-                'intent_id': res.get('id'),
-                'client_secret': res.get('client_secret'),
-            }
+            intent_data = self._airwallex_make_request(f'pa/payment_intents/{transaction.provider_reference}', method='GET')
+            
+            # 如果狀態已失效，清除 reference 觸發後續重建
+            if intent_data.get('status') in ['EXPIRED', 'CANCELED']:
+                _logger.info("Airwallex: 發現過期 Intent %s，準備重新建立", transaction.provider_reference)
+                transaction.write({'provider_reference': False})
+            else:
+                return {
+                    'intent_id': intent_data.get('id'),
+                    'client_secret': intent_data.get('client_secret'),
+                    'country_code': country_code
+                }
 
-        # 2. 建立新 Intent
+        # 3. 建立新 Intent
         payload = {
             'request_id': f"INTENT_{transaction.reference}_{uuid.uuid4().hex[:6]}",
-            'amount': float(transaction.amount),
+            'amount': round(float(transaction.amount), 2),
             'currency': transaction.currency_id.name.upper(),
             'merchant_order_id': transaction.reference,
             'return_url': f"{self.get_base_url().rstrip('/')}/payment/airwallex/return",
             'metadata': {'odoo_transaction_id': transaction.id},
+            'customer': {
+                'address': {'country_code': country_code}
+            }
         }
         
-        _logger.info("Airwallex: 建立新 Intent 給交易 %s", transaction.reference)
+        _logger.info("Airwallex: 建立新 Intent (Country: %s) 給交易 %s", country_code, transaction.reference)
         res = self._airwallex_make_request('pa/payment_intents/create', payload=payload)
         
-        # 3. 回傳精簡後的資訊給前端 (Drop-in UI)
+        # 將新的 provider_reference 寫回 Odoo 交易記錄
+        transaction.write({'provider_reference': res.get('id')})
+
         return {
             'intent_id': res.get('id'),
             'client_secret': res.get('client_secret'),
+            'country_code': country_code
         }
 
     # === API 通訊核心 ===
