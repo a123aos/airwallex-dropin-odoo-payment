@@ -5,122 +5,276 @@ import { _t } from '@web/core/l10n/translation';
 import { PaymentForm } from '@payment/interactions/payment_form';
 import { patch } from '@web/core/utils/patch';
 
+
 patch(PaymentForm.prototype, {
 
     setup() {
         super.setup();
+
         this.airwallexDropIn = null;
         this.airwallexLoaded = false;
-        console.log("Airwallex: setup 執行完成");
+        this.airwallexEnvironment = null;
     },
 
-    async _processRedirectFlow(providerCode, paymentOptionId, paymentMethodCode, processingValues) {
+    async _processRedirectFlow(
+        providerCode,
+        paymentOptionId,
+        paymentMethodCode,
+        processingValues
+    ) {
         if (providerCode === 'airwallex') {
-            console.log("Airwallex: 進入 RedirectFlow");
             return this._processDirectFlow(...arguments);
         }
+
         return super._processRedirectFlow(...arguments);
     },
 
-    async _processDirectFlow(providerCode, paymentOptionId, paymentMethodCode, processingValues) {
+    async _processDirectFlow(
+        providerCode,
+        paymentOptionId,
+        paymentMethodCode,
+        processingValues
+    ) {
         if (providerCode !== 'airwallex') {
             return super._processDirectFlow(...arguments);
         }
 
-        console.log("Airwallex: 進入 DirectFlow, 狀態 airwallexLoaded:", this.airwallexLoaded);
-
         try {
-            // 1. 初始化 SDK
+            // =================================================================
+            // 1. Airwallex environment
+            // =================================================================
+            //
+            // 不再 hard-code：
+            //
+            //     const env = 'prod';
+            //
+            // Backend 現在會傳：
+            //
+            //     airwallex_environment = 'prod'
+            //     或
+            //     airwallex_environment = 'demo'
+            //
+            // 因此 test transaction 不會意外使用 production SDK。
+            //
+
+            const env =
+                processingValues['airwallex_environment']
+                || 'demo';
+
+
+            // =================================================================
+            // 2. Initialize Airwallex SDK
+            // =================================================================
+
             if (!this.airwallexLoaded) {
-                console.log("Airwallex: 開始執行 loadJS...");
-                await loadJS('https://static.airwallex.com/components/sdk/v1/index.js');
-                console.log("Airwallex: loadJS 載入完成，window 物件狀態:", !!window.AirwallexComponentsSDK);
-                
-                const env = 'prod';
-                console.log("Airwallex: 開始執行 init, 環境:", env);
-                
+
+                await loadJS(
+                    'https://static.airwallex.com/components/sdk/v1/index.js'
+                );
+
+                if (!window.AirwallexComponentsSDK) {
+                    throw new Error(
+                        _t("Airwallex SDK 載入失敗")
+                    );
+                }
+
                 await window.AirwallexComponentsSDK.init({
                     env: env,
                     enabledElements: ['payments'],
                 });
-                console.log("Airwallex: init 初始化成功");
+
                 this.airwallexLoaded = true;
-            } else {
-                console.log("Airwallex: SDK 已載入，跳過初始化");
+                this.airwallexEnvironment = env;
+
+            } else if (
+                this.airwallexEnvironment !== env
+            ) {
+
+                // 同一 PaymentForm instance 不應該在 SDK 已初始化後
+                // 再切換 demo / production。
+                //
+                // 如果發生，通常代表 frontend/backend environment
+                // processing values 不一致。
+                throw new Error(
+                    _t(
+                        "Airwallex 支付環境與目前交易不一致，請重新載入頁面"
+                    )
+                );
             }
 
-            // 2. 獲取容器
-            const container = document.getElementById('dropIn');
-            console.log("Airwallex: 檢查容器 #dropIn:", container);
+
+            // =================================================================
+            // 3. Find Drop-in container
+            // =================================================================
+            //
+            // 保留目前 template 使用的 #dropIn，
+            // 所以不需要另外修改 XML template。
+            //
+
+            const container =
+                this.el?.querySelector('#dropIn')
+                || document.getElementById('dropIn');
+
             if (!container) {
-                throw new Error(_t("找不到支付容器 #dropIn"));
+                throw new Error(
+                    _t("找不到支付容器 #dropIn")
+                );
             }
 
-            // 3. 銷毀舊實例
+
+            // =================================================================
+            // 4. Destroy previous Drop-in
+            // =================================================================
+
             if (this.airwallexDropIn) {
-                console.log("Airwallex: 銷毀舊實例");
                 this.airwallexDropIn.destroy();
                 this.airwallexDropIn = null;
             }
 
-            // 4. 建立 Drop-in 設定
-            const currency = processingValues['currency'];
-            const countryCode = processingValues['country_code'] || 'HK';
-            const methodMapping = {
-                'HKD': ['wechatpay', 'payme'],
-                'CNY': ['wechatpay'],
-                'SGD': ['pay_now', 'wechatpay'],
-                'KRW': ['kakaopay', 'wechatpay'],
 
+            // =================================================================
+            // 5. Payment configuration
+            // =================================================================
+
+            const currency =
+                processingValues['currency'];
+
+            const countryCode =
+                processingValues['country_code']
+                || 'HK';
+
+
+            // 指定不同 currency 的 payment methods。
+            const methodMapping = {
+                'HKD': [
+                    'card',
+                    'wechatpay',
+                    'payme',
+                ],
+
+                'CNY': [
+                    'wechatpay',
+                ],
+
+                'SGD': [
+                    'pay_now',
+                    'wechatpay',
+                ],
+
+                'KRW': [
+                    'kakaopay',
+                    'wechatpay',
+                ],
             };
+
 
             const options = {
-                intent_id: processingValues['intent_id'],
-                client_secret: processingValues['client_secret'],
-                currency: currency,
-                country_code: countryCode,
+                intent_id:
+                    processingValues['intent_id'],
+
+                client_secret:
+                    processingValues['client_secret'],
+
+                currency:
+                    currency,
+
+                country_code:
+                    countryCode,
+
                 applePayRequestOptions: {
-                    countryCode: countryCode,
-                    buttonType: 'buy',
-                    buttonColor: 'black',
+                    countryCode:
+                        countryCode,
+
+                    buttonType:
+                        'buy',
+
+                    buttonColor:
+                        'black',
                 },
             };
+
+
             if (methodMapping[currency]) {
-                options.methods = methodMapping[currency];
-            } else {
-            console.warn(`Airwallex: 幣別 ${currency} 未定義特定支付方式，使用預設值。`);
+                options.methods =
+                    methodMapping[currency];
             }
-            
-            // 5. 建立並掛載 Drop-in
-            console.log("Airwallex: 呼叫 createElement...");
-            this.airwallexDropIn = await window.AirwallexComponentsSDK.createElement('dropIn', options);
-            console.log("Airwallex: createElement 完成，準備執行 mount");
-            this.airwallexDropIn.mount('dropIn');
-            console.log("Airwallex: mount 完成");
 
-            // 6. 事件處理
-            this.airwallexDropIn.on('ready', () => {
-                console.log('Airwallex: Drop-in is ready');
-            });
 
-            this.airwallexDropIn.on('success', (event) => {
-                console.log('Airwallex: 支付成功');
-                window.location = '/payment/status';
-            });
+            // =================================================================
+            // 6. Create Drop-in
+            // =================================================================
 
-            this.airwallexDropIn.on('error', (event) => {
-                console.error('Airwallex: 支付錯誤', event);
-                this._displayErrorDialog(
-                    _t("支付失敗"),
-                    event.error?.message || _t("交易發生錯誤")
+            this.airwallexDropIn =
+                await window.AirwallexComponentsSDK.createElement(
+                    'dropIn',
+                    options,
                 );
-                this._enableButton();
-            });
+
+
+            // 保留原本 SDK 使用的 selector，
+            // 避免因 mount API 行為差異造成 regression。
+            this.airwallexDropIn.mount('dropIn');
+
+
+            // =================================================================
+            // 7. Event handling
+            // =================================================================
+
+            this.airwallexDropIn.on(
+                'ready',
+                () => {
+                    // Production 不需要輸出 debug log。
+                }
+            );
+
+
+            this.airwallexDropIn.on(
+                'success',
+                () => {
+                    window.location =
+                        '/payment/status';
+                }
+            );
+
+
+            this.airwallexDropIn.on(
+                'error',
+                (event) => {
+
+                    const message =
+                        event?.error?.message
+                        || _t("交易發生錯誤");
+
+                    // Error 保留，但不輸出完整 event，
+                    // 避免 payment-related data 被 dump 到 browser console。
+                    console.error(
+                        'Airwallex payment error:',
+                        message
+                    );
+
+                    this._displayErrorDialog(
+                        _t("支付失敗"),
+                        message,
+                    );
+
+                    this._enableButton();
+                }
+            );
 
         } catch (err) {
-            console.error("Airwallex: 發生異常:", err);
-            this._displayErrorDialog(_t("初始化錯誤"), err.message);
+
+            console.error(
+                'Airwallex initialization error:',
+                err?.message || err
+            );
+
+            this._displayErrorDialog(
+                _t("初始化錯誤"),
+                err?.message
+                || _t("支付服務初始化失敗"),
+            );
+
             this._enableButton();
         }
-    }
+    },
 });
