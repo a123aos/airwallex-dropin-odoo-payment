@@ -52,15 +52,15 @@
                          alt="WechatPay"
                          style="width: 45px; height: 30px; object-fit: contain; vertical-align: middle; border-radius: 4px;"/>
                 </t>
-                <t t-if="current_currency == 'KRW'">   
+                <!-- <t t-if="current_currency == 'KRW'">   
                     <img t-att-src="'/payment_airwallex/static/description/kakaopay.png'"
                          class="img-fluid o_payment_option_img" 
                          alt="KakaoPay"
                          style="width: 45px; height: 30px; object-fit: contain; vertical-align: middle; border-radius: 4px;"/>
-                </t>
+                </t> -->
                 
                 <!-- 【情境 B】當幣別「不是」HKD CNY SGD KRW 時，同時並排顯示 card brand -->
-                <t t-elif="current_currency not in ['HKD', 'CNY', 'SGD', 'KRW']">
+                <t t-elif="current_currency not in ['HKD', 'CNY', 'SGD']">
                     <img t-att-src="'/payment_airwallex/static/description/applepay.png'" 
                          class="img-fluid o_payment_option_img" alt="Applepay"
                          style="width: 45px; height: 30px; object-fit: contain; vertical-align: middle; border-radius: 4px;"/>

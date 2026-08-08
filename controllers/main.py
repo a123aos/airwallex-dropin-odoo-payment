@@ -110,6 +110,31 @@ class AirwallexController(http.Controller):
                 status=400,
             )
 
+        # =====================================================================
+        # Airwallex Webhook Event ID
+        # =====================================================================
+        #
+        # Event ID 位於 payload 最外層：
+        #
+        # {
+        #     "id": "evt_...",
+        #     "name": "payment_intent.succeeded",
+        #     "data": {
+        #         "object": {...}
+        #     }
+        # }
+        #
+        # 注意：
+        # payload["id"] 是 Webhook Event ID。
+        #
+        # data["object"]["id"] 則是 Payment Intent ID，
+        # 兩者不能混用。
+        #
+        airwallex_event_id = payload.get('id')
+
+        if airwallex_event_id:
+            airwallex_event_id = str(airwallex_event_id)
+
         merchant_order_id = obj.get('merchant_order_id')
         status = (obj.get('status') or '').upper()
 
@@ -222,21 +247,25 @@ class AirwallexController(http.Controller):
                 'airwallex',
                 {
                     'airwallex_obj': obj,
+                    'airwallex_event_id': airwallex_event_id,
                 },
             )
 
             _logger.info(
                 "Airwallex Webhook: "
-                "交易更新成功 reference=%s status=%s",
+                "交易更新成功 reference=%s status=%s event_id=%s",
                 merchant_order_id,
                 status,
+                airwallex_event_id,
             )
 
         except Exception:
             # 保留完整 traceback，方便 production debugging。
             _logger.exception(
-                "Airwallex Webhook: 處理失敗 reference=%s",
+                "Airwallex Webhook: 處理失敗 "
+                "reference=%s event_id=%s",
                 merchant_order_id,
+                airwallex_event_id,
             )
 
             return request.make_response(
@@ -289,7 +318,6 @@ class AirwallexController(http.Controller):
 
         try:
             timestamp_value = int(timestamp)
-
         except (TypeError, ValueError):
             raise Forbidden("Invalid timestamp")
 

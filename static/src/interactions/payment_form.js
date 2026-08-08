@@ -147,7 +147,6 @@ patch(PaymentForm.prototype, {
             // 指定不同 currency 的 payment methods。
             const methodMapping = {
                 'HKD': [
-                    'card',
                     'wechatpay',
                     'payme',
                 ],
