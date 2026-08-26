@@ -16,17 +16,18 @@ patch(PaymentForm.prototype, {
         this.airwallexEnvironment = null;
     },
 
-    async _processRedirectFlow(
-        providerCode,
-        paymentOptionId,
-        paymentMethodCode,
-        processingValues
-    ) {
+    _getPaymentFlow(radio) {
+        const providerCode = this._getProviderCode(radio);
+
+        // Airwallex Drop-in owns the complete client-side payment flow,
+        // including payment methods that internally redirect (e.g. bank_transfer).
+        // From Odoo's perspective, the payment must therefore always use the
+        // direct flow and must not enter Odoo's generic redirect handling.
         if (providerCode === 'airwallex') {
-            return this._processDirectFlow(...arguments);
+            return 'direct';
         }
 
-        return super._processRedirectFlow(...arguments);
+        return super._getPaymentFlow(...arguments);
     },
 
     async _processDirectFlow(
@@ -43,19 +44,6 @@ patch(PaymentForm.prototype, {
             // =================================================================
             // 1. Airwallex environment
             // =================================================================
-            //
-            // 不再 hard-code：
-            //
-            //     const env = 'prod';
-            //
-            // Backend 現在會傳：
-            //
-            //     airwallex_environment = 'prod'
-            //     或
-            //     airwallex_environment = 'demo'
-            //
-            // 因此 test transaction 不會意外使用 production SDK。
-            //
 
             const env =
                 processingValues['airwallex_environment']
@@ -90,11 +78,6 @@ patch(PaymentForm.prototype, {
                 this.airwallexEnvironment !== env
             ) {
 
-                // 同一 PaymentForm instance 不應該在 SDK 已初始化後
-                // 再切換 demo / production。
-                //
-                // 如果發生，通常代表 frontend/backend environment
-                // processing values 不一致。
                 throw new Error(
                     _t(
                         "Airwallex 支付環境與目前交易不一致，請重新載入頁面"
@@ -106,10 +89,6 @@ patch(PaymentForm.prototype, {
             // =================================================================
             // 3. Find Drop-in container
             // =================================================================
-            //
-            // 保留目前 template 使用的 #dropIn，
-            // 所以不需要另外修改 XML template。
-            //
 
             const container =
                 this.el?.querySelector('#dropIn')
@@ -143,8 +122,6 @@ patch(PaymentForm.prototype, {
                 processingValues['country_code']
                 || 'HK';
 
-
-            // 指定不同 currency 的 payment methods。
             const methodMapping = {
                 'HKD': [
                     'wechatpay',
@@ -209,9 +186,6 @@ patch(PaymentForm.prototype, {
                     options,
                 );
 
-
-            // 保留原本 SDK 使用的 selector，
-            // 避免因 mount API 行為差異造成 regression。
             this.airwallexDropIn.mount('dropIn');
 
 
@@ -244,8 +218,6 @@ patch(PaymentForm.prototype, {
                         event?.error?.message
                         || _t("交易發生錯誤");
 
-                    // Error 保留，但不輸出完整 event，
-                    // 避免 payment-related data 被 dump 到 browser console。
                     console.error(
                         'Airwallex payment error:',
                         message
