@@ -118,9 +118,15 @@ patch(PaymentForm.prototype, {
             const currency =
                 processingValues['currency'];
 
+            // Airwallex Drop-in country_code is the shopper country.
+            // It must not default to HK, because Aritrz's merchant country
+            // is separate from the shopper's country.
             const countryCode =
-                processingValues['country_code']
-                || 'HK';
+                processingValues['country_code'];
+
+            // Apple Pay countryCode is the merchant country, not the shopper
+            // country. Aritrz is a Hong Kong merchant.
+            const merchantCountryCode = 'HK';
 
             const methodMapping = {
                 'HKD': [
@@ -159,7 +165,7 @@ patch(PaymentForm.prototype, {
 
                 applePayRequestOptions: {
                     countryCode:
-                        countryCode,
+                        merchantCountryCode,
 
                     buttonType:
                         'buy',
