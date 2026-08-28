@@ -13,7 +13,7 @@ patch(PaymentPostProcessing.prototype, {
         // the browser polling Odoo indefinitely for this payment method.
         if (this.el.dataset.airwallexBankTransferPending === '1') {
             const heading = this.el.querySelector('#o_payment_status_message h5');
-            const message = this.el.querySelector('#o_payment_status_message > t');
+            const message = this.el.querySelector('#o_payment_status_message p.mb-0');
             const skip = this.el.querySelector('a.alert-link');
             const icon = this.el.querySelector('#o_payment_status_icon i');
 
@@ -22,8 +22,8 @@ patch(PaymentPostProcessing.prototype, {
             }
 
             // The native template renders the provider status message as a
-            // direct child of #o_payment_status_message. Replace its text
-            // without replacing Odoo's native page structure.
+            // paragraph. Replace only its text while keeping Odoo's native
+            // payment status page structure intact.
             if (message) {
                 message.textContent =
                     'Please complete your bank transfer using the payment instructions provided. '
