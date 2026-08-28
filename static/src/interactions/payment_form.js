@@ -143,10 +143,10 @@ patch(PaymentForm.prototype, {
                     'wechatpay',
                 ],
 
-                'KRW': [
-                    'kakaopay',
-                    'wechatpay',
-                ],
+                // 'KRW': [
+                //     'kakaopay',
+                //     'wechatpay',
+                // ],
             };
 
 
