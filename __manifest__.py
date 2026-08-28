@@ -12,13 +12,11 @@
     'data': [
         'views/payment_airwallex_templates.xml',
         'views/payment_provider_views.xml',
-        'views/payment_status_templates.xml',
         'data/payment_provider_data.xml',
     ],
     'assets': {
         'web.assets_frontend': [
             'payment_airwallex/static/src/interactions/payment_form.js',
-            'payment_airwallex/static/src/interactions/payment_post_processing.js',
         ],
     },
     'installable': True,
