@@ -129,25 +129,24 @@ patch(PaymentForm.prototype, {
             const merchantCountryCode = 'HK';
 
             const methodMapping = {
-                'HKD': [
-                    'wechatpay',
-                    'payme',
-                ],
-
+                // WeChat Pay is offered for CNY only.
                 'CNY': [
                     'wechatpay',
                 ],
 
+                // Keep PayNow available for SGD, without WeChat Pay.
                 'SGD': [
                     'pay_now',
-                    'wechatpay',
                 ],
-
-                // 'KRW': [
-                //     'kakaopay',
-                //     'wechatpay',
-                // ],
             };
+
+            // Explicitly restrict all other currencies to cards and wallets.
+            // This prevents account-enabled WeChat Pay from appearing by default.
+            const defaultMethods = [
+                'card',
+                'applepay',
+                'googlepay',
+            ];
 
 
             const options = {
@@ -173,13 +172,16 @@ patch(PaymentForm.prototype, {
                     buttonColor:
                         'black',
                 },
+
+                googlePayRequestOptions: {
+                    countryCode:
+                        merchantCountryCode,
+                },
             };
 
 
-            if (methodMapping[currency]) {
-                options.methods =
-                    methodMapping[currency];
-            }
+            options.methods =
+                methodMapping[currency] || defaultMethods;
 
 
             // =================================================================
