@@ -41,9 +41,8 @@
                          style="width: 45px; height: 30px; object-fit: contain; vertical-align: middle; border-radius: 4px;"/>
                 </t>
 
-                <!-- Other supported currencies: cards and digital wallets.
-                     HKD has no Airwallex provider and is filtered server-side. -->
-                <t t-elif="current_currency != 'HKD'">
+                <!-- Other supported currencies: cards and digital wallets. -->
+                <t t-else="">
                     <img t-att-src="'/payment_airwallex/static/description/applepay.png'"
                          class="img-fluid o_payment_option_img"
                          alt="Apple Pay"
