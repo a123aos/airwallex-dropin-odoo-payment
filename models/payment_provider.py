@@ -22,6 +22,38 @@ class PaymentProvider(models.Model):
         ondelete={'airwallex': 'set default'},
     )
 
+    def _get_supported_currencies(self):
+        """Exclude HKD-denominated payments from Airwallex."""
+        currencies = super()._get_supported_currencies()
+        if self.code != 'airwallex':
+            return currencies
+        return currencies.filtered(lambda currency: currency.name != 'HKD')
+
+    @api.model
+    def _get_compatible_providers(
+        self, company_id, partner_id, amount, currency_id=None, force_tokenization=False,
+        is_express_checkout=False, is_validation=False, report=None, **kwargs
+    ):
+        """Never offer Airwallex for an HKD transaction, even with stale settings."""
+        providers = super()._get_compatible_providers(
+            company_id,
+            partner_id,
+            amount,
+            currency_id=currency_id,
+            force_tokenization=force_tokenization,
+            is_express_checkout=is_express_checkout,
+            is_validation=is_validation,
+            report=report,
+            **kwargs,
+        )
+        if currency_id:
+            currency = self.env['res.currency'].browse(currency_id).exists()
+            if currency and currency.name == 'HKD':
+                providers = providers.filtered(
+                    lambda provider: provider.code != 'airwallex'
+                )
+        return providers
+
     # === 憑據配置 ===
     airwallex_client_id = fields.Char(
         string="Airwallex Client ID",
@@ -56,6 +88,9 @@ class PaymentProvider(models.Model):
         not the shopper's country.
         """
         self.ensure_one()
+
+        if transaction.currency_id.name == 'HKD':
+            raise ValidationError(_("Airwallex does not support HKD payments."))
 
         # 1. Shopper country.
         #    Do not use HK as a fallback: Airwallex's Drop-in country_code is
