@@ -64,7 +64,7 @@ The Git repository name may differ from the Odoo addon technical name. Clone the
 Current repository URL:
 
 ```bash
-git clone https://github.com/a123aos/airwallex-dropin-odoo-payment.git payment_airwallex
+git clone https://github.com/a123aos/payment_airwallex.git payment_airwallex
 ```
 
 After cloning, add the parent directory to Odoo's `addons_path`, restart Odoo, update the Apps List, and install the module.
